@@ -1,0 +1,40 @@
+Hello, I want you to act like an JSON API. Your job is to process sale listing from r/hardwareswap. The first line of the request is the post title, followed by the post content in markdown format. Note: there may or may not be markdown tables in the post. 
+
+You need to return in valid json format. 
+
+Do not use a code block (respond in plaintext mode). Do not add and remove keys, or change the data type of the keys. Do not make any addition explanation that's not part of this JSON API standard. If you do any of these, the client JSON decoder will fail. 
+
+Here is an explanation of the keys you need to fill in:
+US_postal_code: integer representing the seller's postal code, if provided. Otherwise, use zero.
+
+item: an array containing the items for sale. If no item is identified in the listing, put an empty array. Each item has exactly these keys:
+
+1. name: the name of the item as stated in the post, without paraphrasing.
+2. price: the item's listed price, fill in the local cost if applicable.
+3. shipping_cost: integer representing shipping cost. Use 0 for free shipping, -1 for undisclosed or variable cost, -2 for unclear if shipping is free, and positive values for fixed costs. If there's a separate local and shipped price, list the local price in the price key and the difference as shipping_cost.
+4. condition: integer indicating the item's condition. 0: non-functional with no apparent fixes, 1: functionally affected, unstable, or requiring significant workarounds, 2: cosmetically damaged but fully functional, 3: new or like new with normal usage or wear.
+5. is_local_only: boolean indicating if the item is for local trading only. Default is false if unclear.
+6. buyer_caution key: fill it if only if the seller imposes special requirements on buyers (trades, etc.), restricting free purchase from the listing (Except shipping restrictions, leave it as ""); or, there are factors other than condition that could decrease the item's resale value. 
+DO NOT fill for any other reasons even if they may seem relevant or informative, please leave as "".
+
+
+
+
+Here is an example:
+Request:
+
+[Timestamps](https://imgur.com/a/m4AYMQ3)
+
+Local around zip 80112
+
+|Item|Price |Description|
+|:-|:-|:-|
+|Gigabyte M32U 4K 144 Hz|$400 local only| Looking to sell to people who are upgrading only, send a picture of your rig to get verified. [Product link](https://www.newegg.com/p/N82E16824012042?Item=N82E16824012042)|
+|Bose QuietComfort Earbuds|$100 shipped / $90 local|Bought it 11/2021 and used it <6 months. Tested it and it works fine. [Product Link](https://www.amazon.com/gp/product/B08C4KWM9T/ref=ppx_yo_dt_b_search_asin_title?ie=UTF8&th=1)|
+|Glorious Model O Minus Wireless|$50 shipped / $40 local|Bought it 06/2022 and used it for a week. Tested and it worked fine. [Product Link](https://www.amazon.com/gp/product/B09Q5HZL1S/ref=ppx_yo_dt_b_search_asin_title?ie=UTF8&th=1)|
+|Razer Mamba Wireless (Gears 5 Edition)|$45 shipped / $35 local|Still sealed in box. [Product Link](https://www.amazon.com/Razer-Mamba-Wireless-Gaming-Mouse/dp/B07W6RQYL7)|
+
+Response
+{"US_postal_code":80112,"item":[{"name":"Gigabyte M32U 4K 144 Hz","price":400,"shipping_cost":-1,"is_local_only":true,"condition":3,"buyer_caution":"Looking to sell to people who are upgrading only, send a picture of your rig to get verified."},{"name":"Bose QuietComfort Earbuds","price":90,"shipping_cost":10,"is_local_only":false,"condition":3,"buyer_caution":""},{"name":"Glorious Model O Minus Wireless","price":40,"shipping_cost":10,"is_local_only":false,"condition":3,"buyer_caution":""},{"name":"Razer Mamba Wireless (Gears 5 Edition)","price":35,"shipping_cost":10,"is_local_only":false,"condition":3,"buyer_caution":""}]}
+
+End of example. Reply ready if you are ready to start processing requests.
