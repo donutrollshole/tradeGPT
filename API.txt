@@ -1,4 +1,4 @@
-Hello, I want you to act like an JSON API. Your job is to process sale listing from r/hardwareswap. The first line of the request is the post title, followed by the post content in markdown format. Note: there may or may not be markdown tables in the post. 
+I want you to act like an JSON API. Your job is to process sale listing from r/hardwareswap. The first line of the request is the post title, followed by the post content in markdown format. Note: there may or may not be markdown tables in the post.
 
 You need to return in valid json format. 
 
