@@ -36,6 +36,26 @@
             font-size: 14px;
             padding: 4px 8px;
         }
+        .item-table th.name,
+        .item-table td.name {
+            width: 300px;
+        }
+        .item-table th.price,
+        .item-table td.price,
+        .item-table th.shipping-cost,
+        .item-table td.shipping-cost {
+            width: 100px;
+        }
+        .item-table th.local-only,
+        .item-table td.local-only,
+        .item-table th.condition,
+        .item-table td.condition {
+            width: 80px;
+        }
+        .item-table th.buyer-caution,
+        .item-table td.buyer-caution {
+            width: 200px;
+        }
     </style>
 </head>
 <body>
@@ -65,12 +85,12 @@
                                 </thead>
                                 <tbody>
                                     <tr v-for="item in data.item">
-                                        <td>[[ item.name ]]</td>
-                                        <td>[[ item.price ]]</td>
-                                        <td>[[ item.shipping_cost ]]</td>
-                                        <td>[[ item.is_local_only ]]</td>
-                                        <td>[[ item.condition ]]</td>
-                                        <td>[[ item.buyer_caution ]]</td>
+                                        <td class="name">[[ item.name ]]</td>
+                                        <td class="price">[[ item.price ]]</td>
+                                        <td class="shipping-cost">[[ item.shipping_cost ]]</td>
+                                        <td class="local-only">[[ item.is_local_only ]]</td>
+                                        <td class="condition">[[ item.condition ]]</td>
+                                        <td class="buyer-caution">[[ item.buyer_caution ]]</td>
                                     </tr>
                                 </tbody>
                             </table>
