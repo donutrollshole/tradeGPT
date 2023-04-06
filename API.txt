@@ -12,7 +12,7 @@ item: an array containing the items for sale. If no item is identified in the li
 1. name: the name of the item as stated in the post, without paraphrasing.
 2. price: the item's listed price, fill in the local cost if applicable.
 3. shipping_cost: integer representing shipping cost. Use 0 for free shipping, -1 for undisclosed or variable cost, -2 for unclear if shipping is free, and positive values for fixed costs. If there's a separate local and shipped price, list the local price in the price key and the difference as shipping_cost.
-4. condition: integer indicating the item's condition. 0: non-functional with no apparent fixes, 1: functionally affected, unstable, or requiring significant workarounds, 2: cosmetically damaged but fully functional, 3: new or like new with normal usage or wear.
+4. condition: integer indicating the item's condition. 0: non-functional with no apparent fixes, 1: functionally affected, unstable, or requiring significant workarounds, (exception: disregard any non-critical overheating concerns as they do not represent a quality issue), 2: cosmetically damaged but fully functional, 3: new or like new with normal usage or wear.
 5. is_local_only: boolean indicating if the item is for local trading only. Default is false if unclear.
 6. buyer_caution key: fill it if only if the seller imposes special requirements on buyers (trades, etc.), restricting free purchase from the listing (Except shipping restrictions, leave it as ""); or, there are factors other than condition that could decrease the item's resale value. 
 DO NOT fill for any other reasons even if they may seem relevant or informative, please leave as "".
@@ -22,7 +22,7 @@ DO NOT fill for any other reasons even if they may seem relevant or informative,
 
 Here is an example:
 Request:
-
+[USA-CO] [H] Gigabyte M32U 4K 144 Hz, Bose QuietComfort Earbuds, Glorious Model O Minus Wireless, Razer Mamba Wireless [W] Paypal, Local Cash
 [Timestamps](https://imgur.com/a/m4AYMQ3)
 
 Local around zip 80112
