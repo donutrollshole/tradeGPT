@@ -2,6 +2,8 @@ import praw
 import os
 import openai
 import time
+from GeoSpatial import GeoSpatial
+import json
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -18,6 +20,8 @@ openai.api_key = os.getenv("OPENAI_API_KEY")
 my_local_zip = int(os.getenv("my_local_zip", 10001))
 max_allowed_local_distance = float(os.getenv("max_allowed_local_distance", -1)) * 1.609344
 
+my_location = GeoSpatial(my_local_zip)
+
 reddit = praw.Reddit(client_id=client_id,
                      client_secret=client_secret,
                      user_agent=user_agent,
@@ -26,6 +30,29 @@ reddit = praw.Reddit(client_id=client_id,
 
 with open('API.txt', 'r') as f:
     API_text = f.read()
+
+
+def GPT_API(submission):
+    for i in range(5):
+        try:
+            response = openai.ChatCompletion.create(
+                model="gpt-3.5-turbo",
+                messages=[
+                    {"role": "system", "content": "You are an API server."},
+                    {"role": "user", "content": API_text},
+                    {"role": "assistant", "content": "ready"},
+                    {"role": "user", "content": submission.title + "\n" + submission.selftext}
+                ]
+            )
+            try:
+                return json.loads(response['choices'][0]['message']['content'])
+            except json.decoder.JSONDecodeError:
+                print("Bad JSON, asking again")
+                print(f"Retry {i} / 5")
+        except Exception as e:
+            print(f"OpenAI or other errors: {e}")
+            print(f"Retry {i} / 5")
+
 
 while True:
     try:  # Praw might throw errors, we want to ignore them
@@ -45,16 +72,12 @@ while True:
                 continue
 
             if 'paypal' or 'cash' in want.lower():  # aka if it's a selling post
-                response = openai.ChatCompletion.create(
-                    model="gpt-3.5-turbo",
-                    messages=[
-                        {"role": "system", "content": "You are an API server."},
-                        {"role": "user", "content": API_text},
-                        {"role": "assistant", "content": "ready"},
-                        {"role": "user", "content": submission.title + "\n" + submission.selftext}
-                    ]
-                )
-                print(response['choices'][0]['message']['content'])
+                response = GPT_API(submission)
+                print(response)
+                if response['US_postal_code']:
+                    print(my_location - GeoSpatial(response['US_postal_code']) <= max_allowed_local_distance)
+
+
     except Exception as e:
         print(f'Reddit Error: {e}\n Continuing')
         time.sleep(2)
