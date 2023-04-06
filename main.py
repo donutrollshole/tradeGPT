@@ -5,9 +5,10 @@ import time
 from GeoSpatial import GeoSpatial
 import json
 from dotenv import load_dotenv
+from flask_socketio import SocketIO, emit
 
 
-def main():
+def main(socketio: SocketIO = None):
     load_dotenv()
 
     client_id = os.getenv("client_id")
@@ -74,6 +75,8 @@ def main():
                 if 'paypal' or 'cash' in want.lower():  # aka if it's a selling post
                     response = GPT_API(submission)
                     print(response)
+                    if socketio:
+                        socketio.emit('new_data', response)
                     if response['US_postal_code']:
                         print(my_location - GeoSpatial(response['US_postal_code']) <= max_allowed_local_distance)
 
