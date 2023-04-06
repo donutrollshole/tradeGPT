@@ -15,6 +15,9 @@ password = os.getenv('password')
 openai.organization = os.getenv("org_id")
 openai.api_key = os.getenv("OPENAI_API_KEY")
 
+my_local_zip = int(os.getenv("my_local_zip", 10001))
+max_allowed_local_distance = float(os.getenv("max_allowed_local_distance", -1)) * 1.609344
+
 reddit = praw.Reddit(client_id=client_id,
                      client_secret=client_secret,
                      user_agent=user_agent,
