@@ -16,6 +16,8 @@ def main(socketio: SocketIO = None):
     user_agent = os.getenv("user_agent")
     username = os.getenv("username")
     password = os.getenv('password')
+    paypal_email = os.getenv("paypal_email")
+    zipcode = os.getenv("zipcode")
 
     openai.organization = os.getenv("org_id")
     openai.api_key = os.getenv("OPENAI_API_KEY")
@@ -54,6 +56,12 @@ def main(socketio: SocketIO = None):
             except Exception as e:
                 print(f"OpenAI or other errors: {e}")
                 print(f"Retry {i} / 5")
+
+    def send_pm(recipient, item_name, item_price, paypal_email, zipcode):  # recipient's username WITHOUT "u/"
+        reddit.redditor(f"{recipient}").message(subject=f"{item_name}", 
+                                                message=f"""Hey! I'd like to purchase the {item_name} for ${item_price}.
+                                                        If you're good with shipping to {zipcode}, please send a PayPal invoice to {paypal_email}. Thanks!""")
+
 
     while True:
         try:  # Praw might throw errors, we want to ignore them
