@@ -80,8 +80,10 @@ def main(socketio: SocketIO = None):
                 except:
                     continue
 
-                if 'paypal' or 'cash' in want.lower():  # aka if it's a selling post
+                if 'paypal' in want.lower() or 'cash' in want.lower():  # aka if it's a selling post
                     response = GPT_API(submission)
+                    response['selftext'] = submission.selftext
+                    response['title'] = submission.title
                     print(response)
                     if socketio:
                         socketio.emit('new_data', response)
