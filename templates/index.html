@@ -5,9 +5,11 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>TradeGPT</title>
-    <script src="https://unpkg.com/vue@2.6.14/dist/vue.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.3.2/socket.io.min.js"></script>
+    <script src="https://unpkg.com/vue@2.7.14/dist/vue.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.6.1/socket.io.min.js"></script>
     <script src="https://unpkg.com/vue-js-modal@1.3.35"></script>
+    <script src="https://cdn.jsdelivr.net/npm/marked@4.3.0/marked.min.js"></script>
+    <script src="https://unpkg.com/dompurify@2.3.4/dist/purify.min.js"></script>
 
     <style>
         .table-container {
@@ -104,9 +106,10 @@
         </div>
         <modal name="selftext-modal" height="auto">
           <h2>Item Details</h2>
-          <p>[[ selftext ]]</p>
+          <div v-html="selftextHtml"></div>
           <button @click="closeModal">Close</button>
         </modal>
+
     </div>
     <script>
         const socket = io();
@@ -114,27 +117,34 @@
         Vue.use(window["vue-js-modal"].default); // Register the vue-js-modal plugin
 
         new Vue({
-          el: "#app",
-          delimiters: ["[[", "]]"],
-          data: {
-            dataEntries: [],
-            selftext: "",
-          },
-          methods: {
-            handleNewData: function (new_data) {
-              this.dataEntries.push(new_data);
+            el: "#app",
+            delimiters: ["[[", "]]"],
+            data: {
+                dataEntries: [],
+                selftext: "",
             },
-            openModal: function (selftext) {
-              this.selftext = selftext;
-              this.$modal.show("selftext-modal");
+            computed: {
+                selftextHtml: function () {
+                    const dirtyHtml = marked(this.selftext);
+                    return DOMPurify.sanitize(dirtyHtml);
+                },
             },
-            closeModal: function () {
-              this.$modal.hide("selftext-modal");
+
+            methods: {
+                handleNewData: function (new_data) {
+                    this.dataEntries.push(new_data);
+                },
+                openModal: function (selftext) {
+                    this.selftext = selftext;
+                    this.$modal.show("selftext-modal");
+                },
+                closeModal: function () {
+                    this.$modal.hide("selftext-modal");
+                },
             },
-          },
-          created: function () {
-            socket.on("new_data", this.handleNewData);
-          },
+            created: function () {
+                socket.on("new_data", this.handleNewData);
+            },
         });
 
 
