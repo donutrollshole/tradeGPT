@@ -12,6 +12,12 @@
     <script src="https://unpkg.com/dompurify@2.3.4/dist/purify.min.js"></script>
 
     <style>
+        .modal-content {
+          max-height: 80vh; /* Set the maximum height relative to the viewport height */
+          overflow-y: auto; /* Enable vertical scrolling if the content overflows */
+          padding: 1rem; /* Add some padding around the content */
+        }
+
         .table-container {
             width: 97%;
             height: 90vh;
@@ -106,7 +112,7 @@
         </div>
         <modal name="selftext-modal" height="auto">
           <h2>Item Details</h2>
-          <div v-html="selftextHtml"></div>
+          <div class="modal-content" v-html="selftextHtml"></div>
           <button @click="closeModal">Close</button>
         </modal>
 
