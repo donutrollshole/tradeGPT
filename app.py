@@ -59,6 +59,11 @@ def user_loader(email):
     return load_user(email)
 
 
+@login_manager.unauthorized_handler
+def unauthorized():
+    return "You must be logged in to access this content.", 403
+
+
 @app.route('/')
 def index():
     global users_logged_in
@@ -72,8 +77,8 @@ def index():
         return render_template('login.html', client_id=CLIENT_ID)
 
 
-@login_required
 @app.route('/send_pm', methods=['GET'])
+@login_required
 def send_pm():
     recipient = request.args.get('recipient', '')
     subject = request.args.get('subject', '')
