@@ -71,7 +71,17 @@ def index():
         start_data_thread()
         return render_template('index.html')
     else:
-        return render_template('login.html')
+        return render_template('login.html', client_id=CLIENT_ID)
+
+
+@login_required
+@app.route('/send_pm', methods=['GET'])
+def send_pm():
+    recipient = request.args.get('recipient', '')
+    subject = request.args.get('subject', '')
+    content = request.args.get('content', '')
+
+    return render_template('send_pm.html', recipient=recipient, subject=subject, content=content)
 
 
 @app.route('/login', methods=['GET', 'POST'])
