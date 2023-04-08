@@ -91,6 +91,8 @@ def main(socketio: SocketIO = None) -> None:
                     response['title'] = submission.title
                     response['author'] = submission.author.name
                     response['trades'] = submission.author_flair_text
+                    if not response['trades']:
+                        response['trades'] = "Trades: 0"
                     response['url'] = submission.url.strip()
                     response['created'] = submission.created_utc  # Unix timestamp
                     response['distance_away'] = -1.0
