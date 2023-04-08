@@ -107,6 +107,7 @@ def main(socketio: SocketIO = None) -> None:
         except Exception as e:
             print(f'Reddit Error: {e}\n Continuing')
             time.sleep(2)
+    print("Thread exiting")
 
 
 if __name__ == '__main__':

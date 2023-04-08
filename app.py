@@ -4,6 +4,7 @@ from flask_login import LoginManager, UserMixin, login_user, logout_user, login_
 import threading
 import requests
 import os
+import time
 from dotenv import load_dotenv
 
 from main import main
@@ -22,14 +23,34 @@ login_manager = LoginManager()
 login_manager.init_app(app)
 login_manager.login_view = "login"
 
-users_logged_in = set()
+users_active = set()
 data_thread = None
+user_last_seen = {}
 
 
 class User(UserMixin):
     def __init__(self, email):
         self.email = email
         self.id = email
+
+
+def check_user_heartbeat():
+    global user_last_seen, users_active
+    print("Heartbeat Thread Started.")
+    while True:
+        current_time = time.time()
+        to_remove = set()
+        for email, last_seen in user_last_seen.items():
+            if current_time - last_seen > 60:  # 1 minute
+                to_remove.add(email)
+
+        for email in to_remove:
+            print(f" {email} is no longer active.")
+            user_last_seen.pop(email)
+            users_active.discard(email)
+            if len(users_active) == 0:
+                stop_data_thread()
+        time.sleep(10)
 
 
 def start_data_thread():
@@ -64,15 +85,22 @@ def unauthorized():
     return "You must be logged in to access this content.", 403
 
 
+@socketio.on('heartbeat')
+def handle_heartbeat():
+    global user_last_seen
+    if current_user.is_authenticated:
+        user_last_seen[current_user.email] = time.time()
+
+
 @app.route('/')
 def index():
-    global users_logged_in
+    global users_active
     if current_user.is_authenticated:
-        users_logged_in.add(current_user.email)
+        users_active.add(current_user.email)
         start_data_thread()
         return render_template('index.html')
     else:
-        if len(users_logged_in) == 0:
+        if len(users_active) == 0:
             stop_data_thread()
         return render_template('login.html', client_id=CLIENT_ID)
 
@@ -89,7 +117,7 @@ def send_pm():
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
-    global users_logged_in
+    global users_active
     if request.method == 'POST':
         token = request.json['auth_code']
         try:
@@ -100,7 +128,8 @@ def login():
                 if user_email in ALLOWED_EMAILS:
                     user = User(user_email)
                     login_user(user)
-                    users_logged_in.add(user_email)
+                    users_active.add(user_email)
+                    user_last_seen[user_email] = time.time()
                     return jsonify({'result': 'success'})
                 else:
                     return jsonify({'result': 'not_allowed'})
@@ -111,17 +140,19 @@ def login():
     return render_template('login.html')
 
 
-@app.route('/logout')
+@app.route('/logout', methods=['GET', 'POST'])
 @login_required
 def logout():
-    global users_logged_in
-    if current_user.email in users_logged_in:  # someone could spam the logout button with user already removed
-        users_logged_in.remove(current_user.email)
-    if len(users_logged_in) == 0:
+    global users_active
+    users_active.discard(current_user.email)
+    if len(users_active) == 0:
         stop_data_thread()
     logout_user()
     return redirect("/")
 
 
 if __name__ == '__main__':
+    # Start the user heartbeat check thread
+    heartbeat_thread = threading.Thread(target=check_user_heartbeat, daemon=True)
+    heartbeat_thread.start()
     socketio.run(app, debug=True, allow_unsafe_werkzeug=True, ssl_context='adhoc')

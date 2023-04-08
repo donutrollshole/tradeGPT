@@ -184,23 +184,9 @@
 <script>
     const socket = io();
 
-    function onExit(e) {
-        fetch("/logout", {
-            keepalive: true,
-            method: 'GET',
-        })
-        e = e || window.event;
-
-        // For IE and Firefox prior to version 4
-        if (e) {
-            e.returnValue = 'Sure?';
-        }
-
-        // For Safari
-        return 'Sure?';
-    }
-
-    window.onbeforeunload = onExit;
+    setInterval(function () {
+        socket.emit('heartbeat');
+    }, 30000);  // 30 seconds
 
     Vue.use(window["vue-js-modal"].default); // Register the vue-js-modal plugin
 
