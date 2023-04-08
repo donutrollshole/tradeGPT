@@ -32,10 +32,6 @@ class User(UserMixin):
         self.id = email
 
 
-def check_data():
-    main(socketio)  # Infinite loop, passed in socketio, so it emit data when it's ready
-
-
 def start_data_thread():
     global data_thread
     if not data_thread:
