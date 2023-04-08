@@ -2,13 +2,16 @@ import praw
 import os
 import openai
 import time
-from GeoSpatial import GeoSpatial
 import json
 from dotenv import load_dotenv
 from flask_socketio import SocketIO, emit
 
+from thread_signal import Signal
+from GeoSpatial import GeoSpatial
 
-def main(socketio: SocketIO = None):
+
+def main(socketio: SocketIO = None) -> None:
+    print("Thread started")
     load_dotenv()
 
     client_id = os.getenv("client_id")
@@ -58,16 +61,18 @@ def main(socketio: SocketIO = None):
                 print(f"Retry {i} / 5")
 
     def send_pm(recipient, item_name, item_price, paypal_email, zipcode):  # recipient's username WITHOUT "u/"
-        reddit.redditor(f"{recipient}").message(subject=f"{item_name}", 
+        reddit.redditor(f"{recipient}").message(subject=f"{item_name}",
                                                 message=f"""Hey! I'd like to purchase the {item_name} for ${item_price}.
                                                         If you're good with shipping to {zipcode}, please send a PayPal invoice to {paypal_email}. Thanks!""")
 
-
-    while True:
+    while Signal.should_run:
         try:  # Praw might throw errors, we want to ignore them
             subreddit = reddit.subreddit('hardwareswap')
             for submission in subreddit.stream.submissions(skip_existing=True,
                                                            pause_after=0):  # REFRESH AND LOOK FOR NEW POSTS AND PROCESS THEM
+                if not Signal.should_run:
+                    print("Thread exiting")
+                    return
                 if submission is None:
                     continue
                 try:
@@ -97,4 +102,5 @@ def main(socketio: SocketIO = None):
 
 
 if __name__ == '__main__':
+    Signal.should_run = True
     main()

@@ -10,12 +10,13 @@
     <script src="https://unpkg.com/vue-js-modal@1.3.35"></script>
     <script src="https://cdn.jsdelivr.net/npm/marked@2.1.3/marked.min.js"></script>
     <script src="https://unpkg.com/dompurify@2.3.4/dist/purify.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.21.1/axios.min.js"></script>
 
     <style>
         .modal-content {
-          max-height: 80vh; /* Set the maximum height relative to the viewport height */
-          overflow-y: auto; /* Enable vertical scrolling if the content overflows */
-          padding: 1rem; /* Add some padding around the content */
+            max-height: 80vh; /* Set the maximum height relative to the viewport height */
+            overflow-y: auto; /* Enable vertical scrolling if the content overflows */
+            padding: 1rem; /* Add some padding around the content */
         }
 
         .table-container {
@@ -46,22 +47,26 @@
             font-size: 14px;
             padding: 4px 8px;
         }
+
         .item-table th.name,
         .item-table td.name {
             width: 300px;
         }
+
         .item-table th.price,
         .item-table td.price,
         .item-table th.shipping-cost,
         .item-table td.shipping-cost {
             width: 100px;
         }
+
         .item-table th.local-only,
         .item-table td.local-only,
         .item-table th.condition,
         .item-table td.condition {
             width: 80px;
         }
+
         .item-table th.buyer-caution,
         .item-table td.buyer-caution {
             width: 200px;
@@ -69,91 +74,109 @@
     </style>
 </head>
 <body>
-    <div id="app">
-        <h1>TradeGPT</h1>
-        <div class="table-container">
-            <table>
-                <thead>
-                    <tr>
-                        <th>Items</th>
-                        <th>US Postal Code</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr v-for="data in dataEntries">
-                        <td>
-                            <table class="item-table" v-if="data.item && data.item.length">
-                                <thead>
-                                    <tr>
-                                        <th>Name</th>
-                                        <th>Price</th>
-                                        <th>Shipping Cost</th>
-                                        <th>Local Only</th>
-                                        <th>Condition</th>
-                                        <th>Buyer Caution</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <tr v-for="item in data.item" @click="openModal(data.selftext)">
-                                        <td class="name">[[ item.name ]]</td>
-                                        <td class="price">[[ item.price ]]</td>
-                                        <td class="shipping-cost">[[ item.shipping_cost ]]</td>
-                                        <td class="local-only">[[ item.is_local_only ]]</td>
-                                        <td class="condition">[[ item.condition ]]</td>
-                                        <td class="buyer-caution">[[ item.buyer_caution ]]</td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </td>
-                        <td>[[ data.US_postal_code ]]</td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
-        <modal name="selftext-modal" height="auto">
-          <h2>Item Details</h2>
-          <div class="modal-content" v-html="selftextHtml"></div>
-          <button @click="closeModal">Close</button>
-        </modal>
-
+<div id="app">
+    <h1>TradeGPT</h1>
+    <div class="table-container">
+        <table>
+            <thead>
+            <tr>
+                <th>Items</th>
+                <th>US Postal Code</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr v-for="data in dataEntries">
+                <td>
+                    <table class="item-table" v-if="data.item && data.item.length">
+                        <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Price</th>
+                            <th>Shipping Cost</th>
+                            <th>Local Only</th>
+                            <th>Condition</th>
+                            <th>Buyer Caution</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr v-for="item in data.item" @click="openModal(data.selftext)">
+                            <td class="name">[[ item.name ]]</td>
+                            <td class="price">[[ item.price ]]</td>
+                            <td class="shipping-cost">[[ item.shipping_cost ]]</td>
+                            <td class="local-only">[[ item.is_local_only ]]</td>
+                            <td class="condition">[[ item.condition ]]</td>
+                            <td class="buyer-caution">[[ item.buyer_caution ]]</td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </td>
+                <td>[[ data.US_postal_code ]]</td>
+            </tr>
+            </tbody>
+        </table>
     </div>
-    <script>
-        const socket = io();
+    <modal name="selftext-modal" height="auto">
+        <h2>Item Details</h2>
+        <div class="modal-content" v-html="selftextHtml"></div>
+        <button @click="closeModal">Close</button>
+    </modal>
+    <button onclick="window.location.href='/logout';">Logout</button>
+</div>
+<script>
+    const socket = io();
 
-        Vue.use(window["vue-js-modal"].default); // Register the vue-js-modal plugin
+    function onExit(e) {
+        fetch("/logout", {
+            keepalive: true,
+            method: 'GET',
+        })
+        e = e || window.event;
 
-        new Vue({
-            el: "#app",
-            delimiters: ["[[", "]]"],
-            data: {
-                dataEntries: [],
-                selftext: "",
+        // For IE and Firefox prior to version 4
+        if (e) {
+            e.returnValue = 'Sure?';
+        }
+
+        // For Safari
+        return 'Sure?';
+    }
+
+    window.onbeforeunload = onExit;
+
+    Vue.use(window["vue-js-modal"].default); // Register the vue-js-modal plugin
+
+    new Vue({
+        el: "#app",
+        delimiters: ["[[", "]]"],
+        data: {
+            dataEntries: [],
+            selftext: "",
+        },
+        computed: {
+            selftextHtml: function () {
+                const dirtyHtml = marked(this.selftext);
+                return DOMPurify.sanitize(dirtyHtml);
             },
-            computed: {
-                selftextHtml: function () {
-                    const dirtyHtml = marked(this.selftext);
-                    return DOMPurify.sanitize(dirtyHtml);
-                },
-            },
+        },
 
-            methods: {
-                handleNewData: function (new_data) {
-                    this.dataEntries.push(new_data);
-                },
-                openModal: function (selftext) {
-                    this.selftext = selftext;
-                    this.$modal.show("selftext-modal");
-                },
-                closeModal: function () {
-                    this.$modal.hide("selftext-modal");
-                },
+        methods: {
+            handleNewData: function (new_data) {
+                this.dataEntries.push(new_data);
             },
-            created: function () {
-                socket.on("new_data", this.handleNewData);
+            openModal: function (selftext) {
+                this.selftext = selftext;
+                this.$modal.show("selftext-modal");
             },
-        });
+            closeModal: function () {
+                this.$modal.hide("selftext-modal");
+            },
+        },
+        created: function () {
+            socket.on("new_data", this.handleNewData);
+        },
+    });
 
 
-    </script>
+</script>
 </body>
 </html>

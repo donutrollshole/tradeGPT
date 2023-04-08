@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login</title>
+    <script src="https://accounts.google.com/gsi/client" defer></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.21.1/axios.min.js"></script>
+</head>
+<body>
+<h1>Login</h1>
+<div id="signin-button"></div>
+
+<script>
+    window.onload = function () {
+        google.accounts.id.initialize({
+            client_id: "484753673130-dtrekv4ppcvhrcpao8j7fjvqoimtg8ve.apps.googleusercontent.com",
+            callback: onSignIn,
+            cancel_on_tap_outside: false,
+        });
+
+        google.accounts.id.renderButton(document.getElementById("signin-button"), {
+            theme: "outline",
+            size: "large",
+        });
+    }
+
+    function onSignIn(response) {
+        const authCode = response.credential;
+        if (authCode) {
+            axios.post("/login", {auth_code: authCode}).then((res) => {
+                if (res.data.result === "success") {
+                    location.href = "/";
+                } else if (res.data.result === 'not_allowed') {
+                    alert('Your email is not allowed to access this application.');
+                } else {
+                    alert('Login failed.');
+                }
+            });
+        } else {
+            console.log("Authentication failed.");
+        }
+    }
+
+</script>
+</body>
+</html>
