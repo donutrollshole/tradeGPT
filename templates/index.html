@@ -216,7 +216,7 @@
 
         methods: {
             handleNewData: function (new_data) {
-                this.dataEntries.push(new_data);
+                this.dataEntries.unshift(new_data);
             },
             openModal: function (selftext) {
                 this.selftext = selftext;
