@@ -12,7 +12,7 @@ from thread_signal import Signal
 load_dotenv()  # Load environment variables from .env file
 
 app = Flask(__name__)
-app.secret_key = os.getenv('GOOGLE_CLIENT_SECRET')
+app.secret_key = os.urandom(24)
 CLIENT_ID = os.getenv('GOOGLE_CLIENT_ID')
 ALLOWED_EMAILS = os.getenv('ALLOWED_EMAILS').split(',')
 
