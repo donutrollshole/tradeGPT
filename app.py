@@ -67,6 +67,8 @@ def index():
         start_data_thread()
         return render_template('index.html')
     else:
+        if len(users_logged_in) == 0:
+            stop_data_thread()
         return render_template('login.html', client_id=CLIENT_ID)
 
 

@@ -89,11 +89,17 @@ def main(socketio: SocketIO = None) -> None:
                     response = GPT_API(submission)
                     response['selftext'] = submission.selftext
                     response['title'] = submission.title
+                    response['author'] = submission.author.name
+                    response['trades'] = submission.author_flair_text
+                    response['url'] = submission.url.strip()
+                    response['created'] = submission.created_utc  # Unix timestamp
+                    response['distance_away'] = -1.0
+                    if response['US_postal_code']:
+                        distance = my_location - GeoSpatial(response['US_postal_code'])
+                        response['distance_away'] = distance.miles
                     print(response)
                     if socketio:
                         socketio.emit('new_data', response)
-                    if response['US_postal_code']:
-                        print(my_location - GeoSpatial(response['US_postal_code']) <= max_allowed_local_distance)
 
 
         except Exception as e:
