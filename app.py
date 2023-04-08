@@ -89,6 +89,7 @@ def unauthorized():
 def handle_heartbeat():
     global user_last_seen
     if current_user.is_authenticated:
+        start_data_thread()
         user_last_seen[current_user.email] = time.time()
 
 

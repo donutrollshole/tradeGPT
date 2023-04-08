@@ -143,14 +143,15 @@
             <tr v-for="data in dataEntries">
                 <td>
                     <table class="item-table" v-if="data.item && data.item.length">
-                        <thead>
+                        <a :href="data.url" target="_blank">[[ data.title ]]</a>
+                        <thead @click="openModal(data)">
                         <tr>
-                            <th><a :href="data.url" target="_blank">Name</a></th>
-                            <th><a :href="data.url" target="_blank">Price</a></th>
-                            <th><a :href="data.url" target="_blank">Shipping Cost</a></th>
-                            <th><a :href="data.url" target="_blank">Local Only</a></th>
-                            <th><a :href="data.url" target="_blank">Condition</a></th>
-                            <th><a :href="data.url" target="_blank">Buyer Caution</a></th>
+                            <th>Name</th>
+                            <th>Price</th>
+                            <th>Shipping Cost</th>
+                            <th>Local Only</th>
+                            <th>Condition</th>
+                            <th>Buyer Caution</th>
                         </tr>
                         </thead>
                         <tbody>
@@ -173,9 +174,11 @@
     <modal name="selftext-modal" height="auto">
         <h3>
             <a :href="'https://www.reddit.com/user/'+post_author" target="_blank">
-                u/[[ post_author ]]&nbsp;&nbsp;&nbsp;[[ post_trades ]]<br>[[ post_time ]]
-            </a>
+                u/[[ post_author ]]&nbsp;&nbsp;&nbsp;[[ post_trades ]]</a>
+            <br>
+            [[ post_time ]]
         </h3>
+        <h3>[[ post_title ]]</h3>
         <div class="modal-content" v-html="selftextHtml"></div>
         <button @click="closeModal">Close</button>
     </modal>
@@ -196,6 +199,7 @@
         data: {
             dataEntries: [],
             selftext: "",
+            post_title: "",
             post_author: "",
             post_trades: "",
             post_time: "",
@@ -208,11 +212,12 @@
         },
 
         methods: {
-            handleNewData: function (new_data) {
+            handleNewData : function (new_data) {
                 this.dataEntries.unshift(new_data);
             },
             openModal: function (entry) {
                 const time = new Date(entry.created * 1000);
+                this.post_title = entry.title;
                 this.selftext = entry.selftext;
                 this.post_author = entry.author;
                 this.post_trades = entry.trades;
