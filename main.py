@@ -40,7 +40,7 @@ def main(socketio: SocketIO = None) -> None:
         API_text = f.read()
 
     def GPT_API(submission):
-        for i in range(5):
+        for i in range(3):
             try:
                 response = openai.ChatCompletion.create(
                     model="gpt-3.5-turbo",
@@ -55,10 +55,11 @@ def main(socketio: SocketIO = None) -> None:
                     return json.loads(response['choices'][0]['message']['content'])
                 except json.decoder.JSONDecodeError:
                     print("Bad JSON, asking again")
-                    print(f"Retry {i} / 5")
+                    print(f"Retry {i} / 3")
             except Exception as e:
                 print(f"OpenAI or other errors: {e}")
-                print(f"Retry {i} / 5")
+                print(f"Retry {i} / 3")
+        return {}
 
     def send_pm(recipient, item_name, item_price, paypal_email, zipcode):  # recipient's username WITHOUT "u/"
         reddit.redditor(f"{recipient}").message(subject=f"{item_name}",
