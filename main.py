@@ -1,3 +1,4 @@
+import re
 import praw
 import os
 import openai
@@ -20,7 +21,6 @@ def main(socketio: SocketIO = None) -> None:
     username = os.getenv("username")
     password = os.getenv('password')
 
-
     openai.organization = os.getenv("org_id")
     openai.api_key = os.getenv("OPENAI_API_KEY")
 
@@ -28,6 +28,12 @@ def main(socketio: SocketIO = None) -> None:
     max_allowed_local_distance = float(os.getenv("max_allowed_local_distance", -1)) * 1.609344
 
     my_location = GeoSpatial(my_local_zip)
+
+    #       search for keywords, but not nxn (RAM)
+    regex = r'(bought for |sold for |asking( for)? |selling for |shipped |for |\$(\s)?)?(?<!\dx)'
+    regex += r'\d{1,4}(\.\d{0,2})?\$?'  # search for numbers and decimal places, and dollar sign after the number.
+    regex += r'(?!\+ bronze|\+ gold|\+ silver|\+ certified|\+ platinum|ghz|\+ trade)'  # don't match 80+ ratings and trades
+    regex += r'( \$| shipped| local| plus|(\s)?\+|(\s)?obo| or| sold| for|(\s)?USD)*'  # match these keywords
 
     reddit = praw.Reddit(client_id=client_id,
                          client_secret=client_secret,
@@ -37,6 +43,22 @@ def main(socketio: SocketIO = None) -> None:
 
     with open('API.txt', 'r') as f:
         API_text = f.read()
+
+    def identifyprice(price_string):
+        price_string = price_string.lower().strip()
+        try:  # If the string only has numbers, it's an irrelevant random number
+            price_string = float(price_string)
+            return False
+        except ValueError:  # There are words or a dollar sign, indicating it's not a random model number
+            if 'bought' in price_string or 'sold' in price_string:
+                return False
+            else:
+                return True
+
+    def highlight(match):
+        if identifyprice(match.group()):
+            return f'<span style="background-color: yellow;">{match.group()}</span>'
+        return match.group()
 
     def GPT_API(submission):
         for i in range(3):
@@ -84,7 +106,7 @@ def main(socketio: SocketIO = None) -> None:
 
                 if 'paypal' in want.lower() or 'cash' in want.lower():  # aka if it's a selling post
                     response = GPT_API(submission)
-                    response['selftext'] = submission.selftext
+                    response['selftext'] = re.sub(regex, highlight, submission.selftext, flags=re.IGNORECASE)
                     response['title'] = submission.title
                     response['author'] = submission.author.name
                     response['trades'] = submission.author_flair_text
