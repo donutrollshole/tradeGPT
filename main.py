@@ -57,10 +57,13 @@ def main(socketio: SocketIO = None):
                 print(f"OpenAI or other errors: {e}")
                 print(f"Retry {i} / 5")
 
+<<<<<<< Updated upstream
     def send_pm(recipient, item_name, item_price, paypal_email, zipcode):  # recipient's username WITHOUT "u/"
         reddit.redditor(f"{recipient}").message(subject=f"{item_name}", 
                                                 message=f"""Hey! I'd like to purchase the {item_name} for ${item_price}.
                                                         If you're good with shipping to {zipcode}, please send a PayPal invoice to {paypal_email}. Thanks!""")
+=======
+>>>>>>> Stashed changes
 
 
     while True:
