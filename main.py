@@ -62,13 +62,10 @@ def main(socketio: SocketIO = None) -> None:
             {'name': 'GPT error', 'price': -1, 'shipping_cost': -1, 'is_local_only': False, 'condition': 3,
              'buyer_caution': ''}], }
 
-<<<<<<< Updated upstream
     def send_pm(recipient, item_name, item_price, paypal_email, zipcode):  # recipient's username WITHOUT "u/"
         reddit.redditor(f"{recipient}").message(subject=f"{item_name}",
                                                 message=f"""Hey! I'd like to purchase the {item_name} for ${item_price}.
                                                         If you're good with shipping to {zipcode}, please send a PayPal invoice to {paypal_email}. Thanks!""")
-=======
->>>>>>> Stashed changes
 
     while Signal.should_run:
         try:  # Praw might throw errors, we want to ignore them
