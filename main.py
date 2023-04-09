@@ -59,7 +59,9 @@ def main(socketio: SocketIO = None) -> None:
             except Exception as e:
                 print(f"OpenAI or other errors: {e}")
                 print(f"Retry {i} / 3")
-        return {}
+        return {'US_postal_code': 0, 'item': [
+            {'name': 'GPT error', 'price': -1, 'shipping_cost': -1, 'is_local_only': False, 'condition': 3,
+             'buyer_caution': ''}], }
 
     def send_pm(recipient, item_name, item_price, paypal_email, zipcode):  # recipient's username WITHOUT "u/"
         reddit.redditor(f"{recipient}").message(subject=f"{item_name}",
