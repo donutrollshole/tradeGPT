@@ -75,5 +75,29 @@
         <input type="submit" value="Send">
     </form>
 </div>
+<script>
+    const form = document.querySelector('form');
+
+    form.addEventListener('submit', async (event) => {
+        event.preventDefault();
+
+        const formData = new FormData(form);
+        const jsonData = Object.fromEntries(formData.entries());
+
+        const response = await fetch('/send_pm', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(jsonData),
+        });
+
+        if (response.ok) {
+            console.log('Form submitted successfully');
+        } else {
+            console.error('Form submission failed');
+        }
+    });
+</script>
 </body>
 </html>

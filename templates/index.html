@@ -156,13 +156,13 @@
                         </tr>
                         </thead>
                         <tbody>
-                        <tr v-for="item in data.item" @click="openModal(data)">
-                            <td class="name">[[ item.name ]]</td>
-                            <td class="price">[[ item.price ]]</td>
-                            <td class="shipping-cost">[[ item.shipping_cost ]]</td>
-                            <td class="local-only">[[ item.is_local_only ]]</td>
-                            <td class="condition">[[ item.condition ]]</td>
-                            <td class="buyer-caution">[[ item.buyer_caution ]]</td>
+                        <tr v-for="item in data.item">
+                            <td class="name" @click="openModal(data)">[[ item.name ]]</td>
+                            <td class="price" @click="openModal(data)">[[ item.price ]]</td>
+                            <td class="shipping-cost" @click="openModal(data)">[[ item.shipping_cost ]]</td>
+                            <td class="local-only" @click="openModal(data)">[[ item.is_local_only ]]</td>
+                            <td class="condition" @click="openModal(data)">[[ item.condition ]]</td>
+                            <td class="buyer-caution" @click="openModal(data)">[[ item.buyer_caution ]]</td>
                             <td>
                                 <button @click="pm(item, data.author)">PM</button>
                             </td>

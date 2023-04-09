@@ -9,6 +9,7 @@ from dotenv import load_dotenv
 
 from main import main
 from thread_signal import Signal
+from pm_sender import *
 
 load_dotenv()  # Load environment variables from .env file
 
@@ -112,9 +113,16 @@ def index():
         return render_template('login.html', client_id=CLIENT_ID)
 
 
-@app.route('/send_pm', methods=['GET'])
-@login_required
+@app.route('/send_pm', methods=['GET', 'POST'])
 def send_pm():
+    if request.method == 'POST':
+        data = request.get_json()
+
+        # Process the form data here
+        print(data)
+        random_send_pm(data['recipient'], data['subject'], data['content'])
+
+        return jsonify(success=True)
     recipient = request.args.get('recipient', '')
     subject = request.args.get('subject', '')
     content = request.args.get('content', '')
