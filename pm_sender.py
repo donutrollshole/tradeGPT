@@ -16,11 +16,9 @@ def get_reddit_instance(account):
 def send_pm(sender, recipient, subject, message):
     reddit = get_reddit_instance(sender)
     reddit.redditor(recipient).message(subject=subject, message=message)
-    print(f"Message sent to u/{recipient}!")
+    print(f"Message sent to u/{recipient} from u/{sender}!")
 # example usage: send_pm(sender="account1", recipient="gpjoe278",
 #                        subject="TEST1", message="hi from u/pcbeest! this is a test.")
-
-
 
 # this function is currently unused.
 def generate_pm_message(item_name, item_price, paypal_email, zipcode):
