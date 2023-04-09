@@ -1,5 +1,6 @@
 import json
 import praw
+import random
 
 with open("reddit_credentials.json", "r") as f:
     reddit_credentials = json.load(f)
@@ -19,6 +20,17 @@ def send_pm(sender, recipient, subject, message):
     print(f"Message sent to u/{recipient} from u/{sender}!")
 # example usage: send_pm(sender="account1", recipient="gpjoe278",
 #                        subject="TEST1", message="hi from u/pcbeest! this is a test.")
+
+def random_send_pm(recipient, subject, message):
+     senders = ["account1", "account2"]
+     sender = senders[random.randint(0, len(senders)-1)]  # choose a random sender from the list senders
+
+     reddit = get_reddit_instance(sender)
+     reddit.redditor(recipient).message(subject=subject, message=message)
+     print(f"Message sent to u/{recipient} from randomly selected u/{sender}!")
+
+
+
 
 # this function is currently unused.
 def generate_pm_message(item_name, item_price, paypal_email, zipcode):
