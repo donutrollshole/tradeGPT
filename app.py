@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, jsonify, session, redirect
+from flask import Flask, render_template, request, jsonify, session, redirect, url_for
 from flask_socketio import SocketIO
 from flask_login import LoginManager, UserMixin, login_user, logout_user, login_required, current_user
 import threading
@@ -26,6 +26,12 @@ login_manager.login_view = "login"
 users_active = set()
 data_thread = None
 user_last_seen = {}
+
+paypal_email = os.getenv("paypal_email")
+zipcode = os.getenv("my_local_zip")
+pm_msg = f"""?recipient=${{author}}&subject=hardwareswap&content=""" \
+         f"""Hey! I would like to purchase the ${{entry.name}} for ${{entry.price}}.""" \
+         f"""If you are good with shipping to {zipcode}, please send a PayPal invoice to {paypal_email}. Thanks!"""
 
 
 class User(UserMixin):
@@ -99,7 +105,7 @@ def index():
     if current_user.is_authenticated:
         users_active.add(current_user.email)
         start_data_thread()
-        return render_template('index.html')
+        return render_template('index.html', pm_msg=pm_msg)
     else:
         if len(users_active) == 0:
             stop_data_thread()

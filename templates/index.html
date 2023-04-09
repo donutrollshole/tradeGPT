@@ -152,6 +152,7 @@
                             <th>Local Only</th>
                             <th>Condition</th>
                             <th>Buyer Caution</th>
+                            <th>PM</th>
                         </tr>
                         </thead>
                         <tbody>
@@ -162,6 +163,9 @@
                             <td class="local-only">[[ item.is_local_only ]]</td>
                             <td class="condition">[[ item.condition ]]</td>
                             <td class="buyer-caution">[[ item.buyer_caution ]]</td>
+                            <td>
+                                <button @click="pm(item, data.author)">PM</button>
+                            </td>
                         </tr>
                         </tbody>
                     </table>
@@ -182,7 +186,8 @@
         <div class="modal-content" v-html="selftextHtml"></div>
         <button @click="closeModal">Close</button>
     </modal>
-    <button onclick="window.location.href='/logout';">Logout</button>
+    "
+    <button onclick="window.location.href='{{ url_for('logout') }}';">Logout</button>
 </div>
 <script>
     const socket = io();
@@ -212,7 +217,7 @@
         },
 
         methods: {
-            handleNewData : function (new_data) {
+            handleNewData: function (new_data) {
                 this.dataEntries.unshift(new_data);
             },
             openModal: function (entry) {
@@ -227,6 +232,11 @@
             closeModal: function () {
                 this.$modal.hide("selftext-modal");
             },
+            pm(entry, author) {
+                const url = `{{ pm_msg }}`;
+                window.open("{{ url_for('send_pm') }}" + encodeURI(url.replace(/&amp;/g, '&')),
+                        '_blank');
+            }
         },
         created: function () {
             socket.on("new_data", this.handleNewData);

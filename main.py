@@ -19,8 +19,7 @@ def main(socketio: SocketIO = None) -> None:
     user_agent = os.getenv("user_agent")
     username = os.getenv("username")
     password = os.getenv('password')
-    paypal_email = os.getenv("paypal_email")
-    zipcode = os.getenv("zipcode")
+
 
     openai.organization = os.getenv("org_id")
     openai.api_key = os.getenv("OPENAI_API_KEY")
