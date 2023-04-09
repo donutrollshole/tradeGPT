@@ -17,18 +17,17 @@ def get_reddit_instance(account):
 def send_pm(sender, recipient, subject, message):
     reddit = get_reddit_instance(sender)
     reddit.redditor(recipient).message(subject=subject, message=message)
-    print(f"Message sent to u/{recipient} from u/{sender}!")
+    print(f"Message sent to u/{recipient} from {sender}!")
 # example usage: send_pm(sender="account1", recipient="gpjoe278",
 #                        subject="TEST1", message="hi from u/pcbeest! this is a test.")
 
 def random_send_pm(recipient, subject, message):
-     senders = ["account1", "account2"]
+     senders = list(reddit_credentials.keys())
      sender = senders[random.randint(0, len(senders)-1)]  # choose a random sender from the list senders
 
      reddit = get_reddit_instance(sender)
      reddit.redditor(recipient).message(subject=subject, message=message)
-     print(f"Message sent to u/{recipient} from randomly selected u/{sender}!")
-
+     print(f"Message sent to u/{recipient} from {sender}!")
 
 
 
@@ -38,4 +37,3 @@ def generate_pm_message(item_name, item_price, paypal_email, zipcode):
         If you're OK with shipping to {zipcode}, send me a Paypal invoice to {paypal_email}! Thanks!"""
 
         return message
-    
