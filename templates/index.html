@@ -196,6 +196,33 @@
         socket.emit('heartbeat');
     }, 30000);  // 30 seconds
 
+    function requestNotificationPermission() {
+        if (Notification.permission !== 'denied') {
+            Notification.requestPermission().then(function (permission) {
+                if (permission === 'granted') {
+                    console.log('Notification permission granted.');
+                }
+            });
+        }
+    }
+
+    requestNotificationPermission();
+
+    function sendNotification(title, options) {
+        if (!('Notification' in window)) {
+            console.error('This browser does not support system notifications.');
+        } else if (Notification.permission === 'granted') {
+            let notification = new Notification(title, options);
+
+            notification.onclick = function (event) {
+                event.preventDefault(); // Prevent the browser from focusing the Notification's tab
+                window.focus();
+            };
+        } else {
+            console.error('Notification permission has not been granted.');
+        }
+    }
+
     Vue.use(window["vue-js-modal"].default); // Register the vue-js-modal plugin
 
     new Vue({
@@ -218,6 +245,10 @@
 
         methods: {
             handleNewData: function (new_data) {
+                sendNotification("New Post", {
+                    body: new_data.title,
+                    icon: "https://styles.redditmedia.com/t5_2skrs/styles/communityIcon_pgwod7arn6a41.png"
+                });
                 this.dataEntries.unshift(new_data);
             },
             openModal: function (entry) {
@@ -235,7 +266,7 @@
             pm(entry, author) {
                 const url = `{{ pm_msg }}`;
                 window.open("{{ url_for('send_pm') }}" + encodeURI(url.replace(/&amp;/g, '&')),
-                        '_blank');
+                    '_blank');
             }
         },
         created: function () {
