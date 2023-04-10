@@ -32,7 +32,7 @@ def random_send_pm(recipient, subject, message):
 def comment_pm(post_id, sender):
      reddit = get_reddit_instance(sender)
      post = reddit.submission(id=post_id)
-     comment_text = 'PM'
+     comment_text = random.choice(['pm', 'PM', 'Pm'])
      post.reply(comment_text)
 
 
