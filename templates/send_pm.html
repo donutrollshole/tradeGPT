@@ -73,10 +73,13 @@
         <textarea id="content" name="content" rows="4" cols="50">{{ content }}</textarea>
 
         <input type="submit" value="Send">
+
+        <div id="message-box"></div>
     </form>
 </div>
 <script>
     const form = document.querySelector('form');
+    const messageBox = document.getElementById('message-box');
 
     form.addEventListener('submit', async (event) => {
         event.preventDefault();
@@ -92,10 +95,14 @@
             body: JSON.stringify(jsonData),
         });
 
+        const responseData = await response.json();
+
         if (response.ok) {
-            console.log('Form submitted successfully');
+            messageBox.textContent = responseData.message;
+            messageBox.style.color = 'green';
         } else {
-            console.error('Form submission failed');
+            messageBox.textContent = responseData.message;
+            messageBox.style.color = 'red';
         }
     });
 </script>

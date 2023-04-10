@@ -118,11 +118,13 @@ def send_pm():
     if request.method == 'POST':
         data = request.get_json()
 
-        # Process the form data here
-        print(data)
-        random_send_pm(data['recipient'], data['subject'], data['content'])
-
-        return jsonify(success=True)
+        if not data['recipient'] or not data['subject'] or not data['content']:
+            return jsonify(success=False, message='\nAll field is required.'), 400
+        try:
+            random_send_pm(data['recipient'], data['subject'], data['content'])
+            return jsonify(success=True, message='\nPM sent successfully')
+        except Exception as e:
+            return jsonify(success=False, message=f'\n{e}'), 400
     recipient = request.args.get('recipient', '')
     subject = request.args.get('subject', '')
     content = request.args.get('content', '')
