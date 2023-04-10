@@ -126,6 +126,32 @@
         .item-table td.buyer-caution {
             width: 200px;
         }
+
+        button {
+            align-self: center;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            background-color: #007bff;
+            color: #fff;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        .button-container {
+            display: flex;
+            justify-content: center;
+            margin-top: 1rem;
+        }
+
+        .button-container button {
+            margin: 0 0.5rem;
+        }
+did
     </style>
 </head>
 <body>
@@ -184,9 +210,11 @@
         </h3>
         <h3>[[ post_title ]]</h3>
         <div class="modal-content" v-html="selftextHtml"></div>
-        <button @click="closeModal">Close</button>
+        <div class="button-container">
+            <button @click="closeModal">Close</button>
+            <button @click="pm({name: 'NAME', price: 'PRICE'}, post_author)">PM</button>
+        </div>
     </modal>
-    "
     <button onclick="window.location.href='{{ url_for('logout') }}';">Logout</button>
 </div>
 <script>
