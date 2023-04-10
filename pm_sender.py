@@ -29,6 +29,11 @@ def random_send_pm(recipient, subject, message):
      reddit.redditor(recipient).message(subject=subject, message=message)
      print(f"Message sent to u/{recipient} from {sender}!")
 
+def comment_pm(post_id, sender):
+     reddit = get_reddit_instance(sender)
+     post = reddit.submission(id=post_id)
+     comment_text = 'PM'
+     post.reply(comment_text)
 
 
 # this function is currently unused.
