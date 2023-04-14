@@ -151,7 +151,8 @@
         .button-container button {
             margin: 0 0.5rem;
         }
-did
+
+        did
     </style>
 </head>
 <body>
@@ -223,6 +224,12 @@ did
     setInterval(function () {
         socket.emit('heartbeat');
     }, 30000);  // 30 seconds
+
+    DOMPurify.addHook('afterSanitizeAttributes', function (node) {
+        if (node.tagName && node.tagName.toLowerCase() === 'a') {
+            node.setAttribute('target', '_blank');
+        }
+    });
 
     function requestNotificationPermission() {
         if (Notification.permission !== 'denied') {

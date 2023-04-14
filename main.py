@@ -70,7 +70,8 @@ def main(socketio: SocketIO = None) -> None:
                         {"role": "user", "content": API_text},
                         {"role": "assistant", "content": "ready"},
                         {"role": "user", "content": submission.title + "\n" + submission.selftext}
-                    ]
+                    ],
+                    temperature=0.2
                 )
                 try:
                     return json.loads(response['choices'][0]['message']['content'])
