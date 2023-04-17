@@ -48,7 +48,7 @@ def check_user_heartbeat():
         current_time = time.time()
         to_remove = set()
         for email, last_seen in user_last_seen.items():
-            if current_time - last_seen > 60:  # 1 minute
+            if current_time - last_seen > 120:  # 2 minute
                 to_remove.add(email)
 
         for email in to_remove:
