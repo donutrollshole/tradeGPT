@@ -12,7 +12,6 @@ from thread_signal import Signal
 from pm_sender import *
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.orm import sessionmaker
-
 load_dotenv()  # Load environment variables from .env file
 CLIENT_ID = os.getenv('GOOGLE_CLIENT_ID')
 ALLOWED_EMAILS = os.getenv('ALLOWED_EMAILS').split(',')
@@ -65,7 +64,7 @@ def check_user_heartbeat():
         current_time = time.time()
         to_remove = set()
         for email, last_seen in user_last_seen.items():
-            if current_time - last_seen > 120:  # 2 minute
+            if current_time - last_seen > 240:  # 2 minute
                 to_remove.add(email)
 
         for email in to_remove:

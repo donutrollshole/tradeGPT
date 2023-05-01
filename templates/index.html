@@ -216,6 +216,7 @@
             <button @click="pm({name: 'NAME', price: 'PRICE'}, post_author)">PM</button>
         </div>
     </modal>
+    <button onclick="window.location.href='{{ url_for('settings') }}';">Settings</button>
     <button onclick="window.location.href='{{ url_for('logout') }}';">Logout</button>
 </div>
 <script>
