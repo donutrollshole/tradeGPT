@@ -18,16 +18,11 @@ def main(socketio: SocketIO = None) -> None:
     client_id = os.getenv("client_id")
     client_secret = os.getenv("client_secret")
     user_agent = os.getenv("user_agent")
-    username = os.getenv("username")
+    username = os.getenv("reddit_username")
     password = os.getenv('password')
 
     openai.organization = os.getenv("org_id")
     openai.api_key = os.getenv("OPENAI_API_KEY")
-
-    my_local_zip = int(os.getenv("my_local_zip", 10001))
-    max_allowed_local_distance = float(os.getenv("max_allowed_local_distance", -1)) * 1.609344
-
-    my_location = GeoSpatial(my_local_zip)
 
     #       search for keywords, but not nxn (RAM)
     regex = r'(bought for |sold for |asking( for)? |selling for |shipped |for |\$(\s)?)?(?<!\dx)'
@@ -115,10 +110,6 @@ def main(socketio: SocketIO = None) -> None:
                         response['trades'] = "Trades: 0"
                     response['url'] = submission.url.strip()
                     response['created'] = submission.created_utc  # Unix timestamp
-                    response['distance_away'] = -1.0
-                    if response['US_postal_code']:
-                        distance = my_location - GeoSpatial(response['US_postal_code'])
-                        response['distance_away'] = distance.miles
                     print(response)
                     if socketio:
                         socketio.emit('new_data', response)
