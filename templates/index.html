@@ -244,12 +244,17 @@
 
     requestNotificationPermission();
 
+    function fillTemplate(templateString, entry, author) {
+        return new Function("entry", "author", `return \`${templateString}\`;`)(entry, author);
+    }
+
     Vue.use(window["vue-js-modal"].default); // Register the vue-js-modal plugin
 
     new Vue({
         el: "#app",
         delimiters: ["[[", "]]"],
         data: {
+            distanceUrl: '{{ url_for("distance") }}',
             dataEntries: [],
             selftext: "",
             post_title: "",
@@ -265,8 +270,26 @@
         },
 
         methods: {
-
-            handleNewData: function (new_data) {
+            async handleNewData(new_data) {
+                if (new_data.US_postal_code === -1 || new_data.US_postal_code === 0) {
+                    new_data.distance_away = 'N/A';
+                } else {
+                    try {
+                        const user_data = await axios.get('{{ url_for('get_user_data') }}');
+                        const response = await axios.get(
+                            this.distanceUrl, {
+                                params: {
+                                    a: new_data.US_postal_code,
+                                    b: user_data.data.local_zip_code,
+                                },
+                            }
+                        );
+                        new_data.distance_away = response.data.dis;
+                    } catch (error) {
+                        console.error(error);
+                        new_data.distance_away = 'N/A'; // If the API call fails, set distance_away to 'N/A'
+                    }
+                }
                 this.sendNotification("New Post", {
                     body: new_data.title,
                     icon: "https://styles.redditmedia.com/t5_2skrs/styles/communityIcon_pgwod7arn6a41.png"
@@ -285,10 +308,15 @@
             closeModal: function () {
                 this.$modal.hide("selftext-modal");
             },
-            pm(entry, author) {
-                const url = `{{ pm_msg }}`;
-                window.open("{{ url_for('send_pm') }}" + encodeURI(url.replace(/&amp;/g, '&')),
-                    '_blank');
+            async pm(entry, author) {
+                try {
+                    const user_data = await axios.get('{{ url_for('get_user_data') }}');
+                    const url = fillTemplate(user_data.data.pm_msg, entry, author);
+                    window.open("{{ url_for('send_pm') }}" + encodeURI(url.replace(/&amp;/g, '&')),
+                        '_blank');
+                } catch (error) {
+                    console.error(error);
+                }
             },
             sendNotification: function (title, options, data) {
                 const self = this;

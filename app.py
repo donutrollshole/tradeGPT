@@ -11,7 +11,8 @@ from main import main
 from thread_signal import Signal
 from pm_sender import *
 from flask_sqlalchemy import SQLAlchemy
-from sqlalchemy.orm import sessionmaker
+from GeoSpatial import GeoSpatial
+
 load_dotenv()  # Load environment variables from .env file
 CLIENT_ID = os.getenv('GOOGLE_CLIENT_ID')
 ALLOWED_EMAILS = os.getenv('ALLOWED_EMAILS').split(',')
@@ -41,6 +42,7 @@ user_last_seen = {}
 
 zipcode = os.getenv("my_local_zip")
 pm_msg_prefix = f"""?recipient=${{author}}&subject=hardwareswap&content="""
+
 
 class User(db.Model, UserMixin):
     id = db.Column(db.String(120), primary_key=True)
@@ -204,6 +206,30 @@ def settings():
         return redirect(url_for('settings'))
 
     return render_template('settings.html', user=user)
+
+
+@app.route('/get_user_data', methods=['GET'])
+@login_required
+def get_user_data():
+    return jsonify(
+        {
+            "paypal_email": current_user.paypal_email,
+            "pm_msg": pm_msg_prefix + current_user.pm_msg,
+            "local_zip_code": current_user.local_zip_code
+        }
+    )
+
+
+@app.route('/distance', methods=['GET'])
+@login_required
+def distance():
+    try:
+        a = int(request.args.get('a', ''))
+        b = int(request.args.get('b', ''))
+        distance = GeoSpatial(a) - GeoSpatial(b)
+        return jsonify(dis=distance.mi)
+    except Exception as e:
+        return "Bad Request", 400
 
 
 if __name__ == '__main__':

@@ -8,7 +8,6 @@ from dotenv import load_dotenv
 from flask_socketio import SocketIO, emit
 
 from thread_signal import Signal
-from GeoSpatial import GeoSpatial
 
 
 def main(socketio: SocketIO = None) -> None:
