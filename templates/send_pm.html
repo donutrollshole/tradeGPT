@@ -63,6 +63,9 @@
 <div class="container">
     <h1>Send Private Message</h1>
     <form method="POST" action="">
+        <label for="post">Post ID for commenting PM:</label>
+        <input type="text" id="post" name="post" value="{{ post }}">
+
         <label for="recipient">Recipient:</label>
         <input type="text" id="recipient" name="recipient" value="{{ recipient }}">
 

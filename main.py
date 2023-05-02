@@ -108,6 +108,7 @@ def main(socketio: SocketIO = None) -> None:
                     if not response['trades']:
                         response['trades'] = "Trades: 0"
                     response['url'] = submission.url.strip()
+                    response['id'] = submission.id
                     response['created'] = submission.created_utc  # Unix timestamp
                     print(response)
                     if socketio:

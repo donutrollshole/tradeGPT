@@ -41,7 +41,7 @@ data_thread = None
 user_last_seen = {}
 
 zipcode = os.getenv("my_local_zip")
-pm_msg_prefix = f"""?recipient=${{author}}&subject=hardwareswap&content="""
+pm_msg_prefix = """?post=${post_id}&recipient=${author}&subject=hardwareswap&content="""
 
 
 class User(db.Model, UserMixin):
@@ -55,7 +55,7 @@ class User(db.Model, UserMixin):
         self.id = email
         self.local_zip_code = 10001
         self.pm_msg = \
-            (f"Hey! I would like to purchase the ${{entry.name}} for ${{entry.price}}. If you are good with"
+            (f"Hey! I would like to purchase the ${{entry.name}} for ${{entry.price}}. If you are good with "
              f"shipping to {self.local_zip_code}, please send a PayPal invoice to {self.paypal_email}. Thanks!")
 
 
@@ -142,19 +142,21 @@ def index():
 def send_pm():
     if request.method == 'POST':
         data = request.get_json()
-
         if not data['recipient'] or not data['subject'] or not data['content']:
             return jsonify(success=False, message='\nAll field is required.'), 400
         try:
-            random_send_pm(data['recipient'], data['subject'], data['content'])
+            sender = random_send_pm(data['recipient'], data['subject'], data['content'])
+            if data['post']:
+                comment_pm(post_id=data['post'], sender=sender)
             return jsonify(success=True, message='\nPM sent successfully')
         except Exception as e:
             return jsonify(success=False, message=f'\n{e}'), 400
+    post = request.args.get('post', '')
     recipient = request.args.get('recipient', '')
     subject = request.args.get('subject', '')
     content = request.args.get('content', '')
 
-    return render_template('send_pm.html', recipient=recipient, subject=subject, content=content)
+    return render_template('send_pm.html', recipient=recipient, subject=subject, content=content, post=post)
 
 
 @app.route('/login', methods=['GET', 'POST'])

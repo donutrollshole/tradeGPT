@@ -191,7 +191,7 @@
                             <td class="condition" @click="openModal(data)">[[ item.condition ]]</td>
                             <td class="buyer-caution" @click="openModal(data)">[[ item.buyer_caution ]]</td>
                             <td>
-                                <button @click="pm(item, data.author)">PM</button>
+                                <button @click="pm(item, data.author, data.id)">PM</button>
                             </td>
                         </tr>
                         </tbody>
@@ -213,10 +213,10 @@
         <div class="modal-content" v-html="selftextHtml"></div>
         <div class="button-container">
             <button @click="closeModal">Close</button>
-            <button @click="pm({name: 'NAME', price: 'PRICE'}, post_author)">PM</button>
+            <button @click="pm({name: 'NAME', price: 'PRICE'}, post_author, post_id)">PM</button>
         </div>
     </modal>
-    <button onclick="window.location.href='{{ url_for('settings') }}';">Settings</button>
+    <button onclick="window.open('{{ url_for('settings') }}', '_blank');">Settings</button>
     <button onclick="window.location.href='{{ url_for('logout') }}';">Logout</button>
 </div>
 <script>
@@ -244,8 +244,8 @@
 
     requestNotificationPermission();
 
-    function fillTemplate(templateString, entry, author) {
-        return new Function("entry", "author", `return \`${templateString}\`;`)(entry, author);
+    function fillTemplate(templateString, entry, author, post_id) {
+        return new Function("entry", "author", "post_id", `return \`${templateString}\`;`)(entry, author, post_id);
     }
 
     Vue.use(window["vue-js-modal"].default); // Register the vue-js-modal plugin
@@ -261,6 +261,7 @@
             post_author: "",
             post_trades: "",
             post_time: "",
+            post_id: "",
         },
         computed: {
             selftextHtml: function () {
@@ -303,15 +304,16 @@
                 this.post_author = entry.author;
                 this.post_trades = entry.trades;
                 this.post_time = time.toString();
+                this.post_id = entry.id;
                 this.$modal.show("selftext-modal");
             },
             closeModal: function () {
                 this.$modal.hide("selftext-modal");
             },
-            async pm(entry, author) {
+            async pm(entry, author, post_id) {
                 try {
                     const user_data = await axios.get('{{ url_for('get_user_data') }}');
-                    const url = fillTemplate(user_data.data.pm_msg, entry, author);
+                    const url = fillTemplate(user_data.data.pm_msg, entry, author, post_id);
                     window.open("{{ url_for('send_pm') }}" + encodeURI(url.replace(/&amp;/g, '&')),
                         '_blank');
                 } catch (error) {
