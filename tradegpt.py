@@ -1,6 +1,9 @@
 from flask import Flask, render_template, request, jsonify, session, redirect, url_for
+from flask_session import Session
 from flask_socketio import SocketIO
 from flask_login import LoginManager, UserMixin, login_user, logout_user, login_required, current_user
+from redis import Redis
+
 import threading
 import requests
 import os
@@ -28,9 +31,13 @@ app.secret_key = os.urandom(24)
 app.config['SQLALCHEMY_DATABASE_URI'] = \
     f'postgresql://{PSQL_USERNAME}:{PSQL_PASSWORD}@{PSQL_HOST}:{PSQL_PORT}/{PSQL_DB}'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-db = SQLAlchemy(app)
+app.config['SESSION_TYPE'] = 'redis'
+app.config['SESSION_REDIS'] = Redis(host='localhost', port=6379)
+app.config['SESSION_PERMANENT'] = True
 
-socketio = SocketIO(app)
+db = SQLAlchemy(app)
+Session(app)
+socketio = SocketIO(app, cors_allowed_origins="*", engineio_logger=True, logger=True)
 
 login_manager = LoginManager()
 login_manager.init_app(app)
@@ -40,7 +47,6 @@ users_active = set()
 data_thread = None
 user_last_seen = {}
 
-zipcode = os.getenv("my_local_zip")
 pm_msg_prefix = """?post=${post_id}&recipient=${author}&subject=hardwareswap&content="""
 
 
@@ -117,7 +123,7 @@ def unauthorized():
     return "You must be logged in to access this content.", 403
 
 
-@socketio.on('heartbeat')
+@socketio.on('heartbeat', namespace='/')
 def handle_heartbeat():
     global user_last_seen
     if current_user.is_authenticated:
@@ -179,8 +185,8 @@ def login():
                     return jsonify({'result': 'not_allowed'})
             else:
                 return jsonify({'result': 'failure'})
-        except:
-            return jsonify({'result': 'failure'})
+        except Exception as e:
+            return jsonify({'result': f'{e}'})
     return render_template('login.html')
 
 
@@ -234,10 +240,10 @@ def distance():
         return "Bad Request", 400
 
 
+with app.app_context():
+    db.create_all()  # Create the tables in your database
+# Start the user heartbeat check thread
+
 if __name__ == '__main__':
-    with app.app_context():
-        db.create_all()  # Create the tables in your database
-    # Start the user heartbeat check thread
     heartbeat_thread = threading.Thread(target=check_user_heartbeat, daemon=True)
     heartbeat_thread.start()
-    socketio.run(app, debug=True, allow_unsafe_werkzeug=True, ssl_context='adhoc')
