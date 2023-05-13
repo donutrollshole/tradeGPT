@@ -68,26 +68,31 @@ class User(db.Model, UserMixin):
 
 
 def check_user_heartbeat():
-    print("Heartbeat Thread Started.")
-    while True:
-        current_time = time.time()
-        to_remove = set()
-        for email in redis_client.hkeys('user_last_seen'):
-            last_seen = float(redis_client.hget('user_last_seen', email))
-            if current_time - last_seen > 240:  # 2 minute
-                to_remove.add(email)
+    try:
+        print("Heartbeat Thread Started.")
+        while True:
+            current_time = time.time()
+            to_remove = set()
+            for email in redis_client.hkeys('user_last_seen'):
+                last_seen = float(redis_client.hget('user_last_seen', email))
+                if current_time - last_seen > 240:  # 2 minute
+                    to_remove.add(email)
 
-        for email in to_remove:
-            print(f" {email} is no longer active.")
-            with redis_client.pipeline() as pipe:
-                pipe.multi()
-                pipe.hdel('user_last_seen', email)
-                pipe.srem('users_active', email)
-                responses = pipe.execute()
+            for email in to_remove:
+                print(f" {email} is no longer active.")
+                with redis_client.pipeline() as pipe:
+                    pipe.multi()
+                    pipe.hdel('user_last_seen', email)
+                    pipe.srem('users_active', email)
+                    responses = pipe.execute()
+                    print(responses)
 
-            if redis_client.scard('users_active') == 0:
-                stop_data_thread()
-        time.sleep(10)
+                if redis_client.scard('users_active') == 0:
+                    stop_data_thread()
+            time.sleep(10)
+    except Exception as e:
+        print(f"An error occurred in the heartbeat check: {e}")
+        check_user_heartbeat()
 
 
 def start_data_thread():
