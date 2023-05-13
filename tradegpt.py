@@ -25,6 +25,8 @@ PSQL_HOST = os.getenv('PSQL_HOST')
 PSQL_PORT = os.getenv('PSQL_PORT')
 PSQL_DB = os.getenv('PSQL_DB')
 
+redis_client = Redis(host='localhost', port=6379)
+
 app = Flask(__name__)
 app.secret_key = os.urandom(24)
 
@@ -32,7 +34,7 @@ app.config['SQLALCHEMY_DATABASE_URI'] = \
     f'postgresql://{PSQL_USERNAME}:{PSQL_PASSWORD}@{PSQL_HOST}:{PSQL_PORT}/{PSQL_DB}'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['SESSION_TYPE'] = 'redis'
-app.config['SESSION_REDIS'] = Redis(host='localhost', port=6379)
+app.config['SESSION_REDIS'] = redis_client
 app.config['SESSION_PERMANENT'] = True
 
 db = SQLAlchemy(app)
@@ -66,20 +68,24 @@ class User(db.Model, UserMixin):
 
 
 def check_user_heartbeat():
-    global user_last_seen, users_active
     print("Heartbeat Thread Started.")
     while True:
         current_time = time.time()
         to_remove = set()
-        for email, last_seen in user_last_seen.items():
+        for email in redis_client.hkeys('user_last_seen'):
+            last_seen = float(redis_client.hget('user_last_seen', email))
             if current_time - last_seen > 240:  # 2 minute
                 to_remove.add(email)
 
         for email in to_remove:
             print(f" {email} is no longer active.")
-            user_last_seen.pop(email)
-            users_active.discard(email)
-            if len(users_active) == 0:
+            with redis_client.pipeline() as pipe:
+                pipe.multi()
+                pipe.hdel('user_last_seen', email)
+                pipe.srem('users_active', email)
+                responses = pipe.execute()
+
+            if redis_client.scard('users_active') == 0:
                 stop_data_thread()
         time.sleep(10)
 
@@ -125,11 +131,9 @@ def unauthorized():
 
 @socketio.on('heartbeat', namespace='/')
 def handle_heartbeat():
-    global user_last_seen
     if current_user.is_authenticated:
         start_data_thread()
-        user_last_seen[current_user.id] = time.time()
-
+        redis_client.hset('user_last_seen', current_user.id, time.time())
 
 @app.route('/')
 def index():
@@ -247,3 +251,4 @@ with app.app_context():
 if __name__ == '__main__':
     heartbeat_thread = threading.Thread(target=check_user_heartbeat, daemon=True)
     heartbeat_thread.start()
+    # socketio.run(app, debug=True, allow_unsafe_werkzeug=True, ssl_context='adhoc')
