@@ -56,7 +56,7 @@
                 } else if (res.data.result === 'not_allowed') {
                     alert('Your email is not allowed to access this application.');
                 } else {
-                    alert('Login failed.');
+                    alert(res.data.result);
                 }
             });
         } else {
